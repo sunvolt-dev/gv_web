@@ -1,11 +1,12 @@
 <?php
-require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/user_auth.php';
 
 $page_title = '주문/결제';
 $items = cart_items_detailed();
 $total = cart_total();
 $shipping = ($total > 0 && $total < 50000) ? 3000 : 0;
 $grand = $total + $shipping;
+$current_user = user();
 
 // 빈 장바구니 → 메인으로
 if (empty($items)) {
@@ -13,19 +14,52 @@ if (empty($items)) {
     exit;
 }
 
-// 주문하기 처리 (페이크)
+// 주문하기 처리 (회원/비회원 모두 DB 저장)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $order_no = date('Ymd') . '-' . str_pad((string)random_int(1, 9999), 4, '0', STR_PAD_LEFT);
+    $name     = trim((string)($_POST['name']    ?? ''));
+    $phone    = trim((string)($_POST['phone']   ?? ''));
+    $address  = trim((string)($_POST['address'] ?? ''));
+    $memo     = trim((string)($_POST['memo']    ?? ''));
+    $pay      = trim((string)($_POST['pay']     ?? ''));
+
+    db()->beginTransaction();
+    try {
+        db_exec(
+            'INSERT INTO orders
+              (order_no, user_id, recv_name, recv_phone, recv_address, memo, pay_method, total_amount, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            [$order_no, $current_user['id'] ?? null, $name, $phone, $address, $memo, $pay, $grand, '결제완료']
+        );
+        $order_id = (int)db()->lastInsertId();
+
+        foreach ($items as $i) {
+            db_exec(
+                'INSERT INTO order_items
+                  (order_id, it_id, it_name, option_text, unit_price, qty, subtotal)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [
+                    $order_id, (int)$i['product']['it_id'], $i['product']['it_name'],
+                    $i['option_text'] ?: null, $i['unit_price'], $i['qty'], $i['subtotal'],
+                ]
+            );
+        }
+        db()->commit();
+    } catch (Throwable $e) {
+        db()->rollBack();
+        throw $e;
+    }
+
     $_SESSION['last_order'] = [
         'order_no' => $order_no,
         'items'    => $items,
         'total'    => $grand,
-        'name'     => trim((string)($_POST['name'] ?? '')),
-        'phone'    => trim((string)($_POST['phone'] ?? '')),
-        'address'  => trim((string)($_POST['address'] ?? '')),
+        'name'     => $name,
+        'phone'    => $phone,
+        'address'  => $address,
         'date'     => date('Y-m-d H:i'),
     ];
-    $_SESSION['cart'] = []; // 장바구니 비우기
+    $_SESSION['cart'] = [];
     header('Location: /checkout_complete.php');
     exit;
 }
@@ -66,19 +100,19 @@ require __DIR__ . '/../includes/header.php';
         <div class="space-y-3">
           <div>
             <label class="text-xs font-semibold text-gray-600">이름 *</label>
-            <input type="text" name="name" required value="홍길동"
+            <input type="text" name="name" required value="<?= h($current_user['name'] ?? '') ?>"
                    class="mt-1 w-full h-11 px-3 border border-gray-300 rounded-lg
                           focus:outline-none focus:ring-2 focus:ring-accent">
           </div>
           <div>
             <label class="text-xs font-semibold text-gray-600">연락처 *</label>
-            <input type="text" name="phone" required value="010-1234-5678"
+            <input type="text" name="phone" required value="<?= h($current_user['phone'] ?? '') ?>" placeholder="010-1234-5678"
                    class="mt-1 w-full h-11 px-3 border border-gray-300 rounded-lg
                           focus:outline-none focus:ring-2 focus:ring-accent">
           </div>
           <div>
             <label class="text-xs font-semibold text-gray-600">이메일</label>
-            <input type="email" name="email" value="example@test.com"
+            <input type="email" name="email" value="<?= h($current_user['email'] ?? '') ?>" placeholder="example@email.com"
                    class="mt-1 w-full h-11 px-3 border border-gray-300 rounded-lg
                           focus:outline-none focus:ring-2 focus:ring-accent">
           </div>
@@ -91,12 +125,12 @@ require __DIR__ . '/../includes/header.php';
         <div class="space-y-3">
           <div>
             <label class="text-xs font-semibold text-gray-600">받는 분 *</label>
-            <input type="text" name="recv_name" required value="홍길동"
+            <input type="text" name="recv_name" required value="<?= h($current_user['name'] ?? '') ?>"
                    class="mt-1 w-full h-11 px-3 border border-gray-300 rounded-lg">
           </div>
           <div>
             <label class="text-xs font-semibold text-gray-600">주소 *</label>
-            <input type="text" name="address" required value="서울시 강남구 테헤란로 123 (데모)"
+            <input type="text" name="address" required value="<?= h($current_user['address'] ?? '') ?>" placeholder="배송지 주소"
                    class="mt-1 w-full h-11 px-3 border border-gray-300 rounded-lg">
           </div>
           <div>

@@ -6,14 +6,14 @@
  *   - host: 127.0.0.1
  *   - user: root
  *   - pass: (빈 문자열)
- *   - db:   webpage
+ *   - db:   sunvolt-webpage
  */
 
 return [
     'db' => [
         'host'    => '127.0.0.1',
         'port'    => 3306,
-        'name'    => 'Sunvolt-webpage',
+        'name'    => 'sunvolt-webpage',
         'user'    => 'root',
         'pass'    => '',
         'charset' => 'utf8mb4',

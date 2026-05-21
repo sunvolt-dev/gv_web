@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/functions.php';
+require_once __DIR__ . '/user_auth.php';
 cart_init();
 
 $site = (require __DIR__ . '/config.php')['site'];
@@ -7,6 +8,7 @@ $site = (require __DIR__ . '/config.php')['site'];
 $page_title = $page_title ?? $site['name'];
 $page_desc  = $page_desc  ?? $site['tagline'];
 $cats_l1    = category_tree()[0] ?? [];
+$current_user = user();
 ?>
 <!DOCTYPE html>
 <html lang="ko">
@@ -47,21 +49,29 @@ $cats_l1    = category_tree()[0] ?? [];
 <body class="font-sans bg-white text-gray-900 antialiased"
       x-data="{ mobileMenu: false }">
 
+<!-- 상단 유틸리티 + 메인 헤더 (함께 고정) -->
+<div class="sticky top-0 z-40">
+
 <!-- 상단 유틸리티 바 -->
 <div class="hidden md:block bg-primary-dark text-white/80 text-xs">
   <div class="max-w-7xl mx-auto px-4 h-9 flex items-center justify-between">
     <div>전국 무료배송 · 평일 오후 3시 이전 주문 시 당일 발송</div>
     <div class="flex gap-4">
-      <a href="#" class="hover:text-accent">고객센터 <?= h($site['phone']) ?></a>
-      <a href="#" class="hover:text-accent">로그인</a>
-      <a href="#" class="hover:text-accent">회원가입</a>
+      <a href="tel:<?= h($site['phone']) ?>" class="hover:text-accent">고객센터 <?= h($site['phone']) ?></a>
+      <?php if ($current_user): ?>
+        <a href="/mypage/" class="hover:text-accent"><?= h($current_user['name']) ?>님</a>
+        <a href="/auth/logout.php" class="hover:text-accent">로그아웃</a>
+      <?php else: ?>
+        <a href="/auth/login.php" class="hover:text-accent">로그인</a>
+        <a href="/auth/register.php" class="hover:text-accent">회원가입</a>
+      <?php endif; ?>
       <a href="/admin/" class="hover:text-accent">관리자</a>
     </div>
   </div>
 </div>
 
 <!-- 메인 헤더 -->
-<header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200">
+<header class="bg-white/95 backdrop-blur border-b border-gray-200">
   <div class="max-w-7xl mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-6">
 
     <!-- 모바일 햄버거 -->
@@ -135,10 +145,22 @@ $cats_l1    = category_tree()[0] ?? [];
           </a>
         </li>
         <?php endforeach; ?>
+        <li class="ml-2 pl-3 border-l">
+          <a href="/cases/list.php" class="px-3 py-2 hover:text-accent-dark text-gray-700 hover:text-primary">
+            납품사례
+          </a>
+        </li>
+        <li>
+          <a href="/blog/list.php" class="px-3 py-2 hover:text-accent-dark text-gray-700 hover:text-primary">
+            블로그
+          </a>
+        </li>
       </ul>
     </div>
   </nav>
 </header>
+
+</div><!-- /sticky 유틸리티+헤더 래퍼 -->
 
 <!-- 모바일 메뉴 슬라이드 패널 -->
 <div x-show="mobileMenu" x-cloak class="fixed inset-0 z-50 md:hidden"
@@ -172,11 +194,20 @@ $cats_l1    = category_tree()[0] ?? [];
           </a>
         <?php endforeach; ?>
       <?php endforeach; ?>
+      <a href="/cases/list.php" class="block px-4 py-3 font-semibold text-gray-800 hover:bg-gray-50 border-t bg-gray-50">납품사례</a>
+      <a href="/blog/list.php" class="block px-4 py-3 font-semibold text-gray-800 hover:bg-gray-50 border-t">블로그</a>
     </nav>
-    <div class="border-t p-4 text-xs text-gray-500 space-y-1">
+    <div class="border-t p-4 text-xs text-gray-500 space-y-2">
       <div>고객센터 <?= h($site['phone']) ?></div>
-      <a href="/cart.php" class="block text-primary font-semibold">장바구니 (<?= cart_count() ?>)</a>
-      <a href="/admin/" class="block text-gray-600">관리자 로그인</a>
+      <a href="/cart.php" class="block text-primary font-semibold">🛒 장바구니 (<?= cart_count() ?>)</a>
+      <?php if ($current_user): ?>
+        <a href="/mypage/" class="block text-primary font-semibold">👤 <?= h($current_user['name']) ?>님 (마이페이지)</a>
+        <a href="/auth/logout.php" class="block text-red-600">로그아웃</a>
+      <?php else: ?>
+        <a href="/auth/login.php" class="block text-primary font-semibold">로그인</a>
+        <a href="/auth/register.php" class="block text-gray-600">회원가입</a>
+      <?php endif; ?>
+      <a href="/admin/" class="block text-gray-500 pt-2 border-t">관리자 로그인</a>
     </div>
   </aside>
 </div>

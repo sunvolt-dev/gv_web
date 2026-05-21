@@ -37,9 +37,12 @@ $admin_title = $admin_title ?? '관리자';
   <nav class="p-3 space-y-1 text-sm">
     <?php
     $menu = [
-      ['url' => '/admin/',            'icon' => '📊', 'label' => '대시보드',     'key' => 'dashboard'],
-      ['url' => '/admin/products.php','icon' => '📦', 'label' => '상품 관리',     'key' => 'products'],
-      ['url' => '/admin/categories.php','icon' => '🗂️', 'label' => '카테고리 관리', 'key' => 'categories'],
+      ['url' => '/admin/',              'icon' => '📊', 'label' => '대시보드',      'key' => 'dashboard'],
+      ['url' => '/admin/banners.php',   'icon' => '🖼️', 'label' => '메인 배너',     'key' => 'banners'],
+      ['url' => '/admin/products.php',  'icon' => '📦', 'label' => '상품 관리',      'key' => 'products'],
+      ['url' => '/admin/categories.php','icon' => '🗂️', 'label' => '카테고리 관리',  'key' => 'categories'],
+      ['url' => '/admin/posts.php',     'icon' => '📝', 'label' => '블로그 관리',    'key' => 'posts'],
+      ['url' => '/admin/cases.php',     'icon' => '🏢', 'label' => '납품사례 관리',  'key' => 'cases'],
     ];
     foreach ($menu as $m):
       $active = $m['key'] === $admin_page;
