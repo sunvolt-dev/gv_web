@@ -139,4 +139,10 @@
 - 2026-04-29 — ACTION_PLAN 수립, 과제 1 착수
 - 2026-04-29 — 과제 1 (SEO/AEO) 구현 완료: robots·sitemap·OG·JSON-LD(Organization/WebSite/Product/BlogPosting/Article/Breadcrumb/FAQPage)·FAQ페이지. 코드 검증 통과, 사용자 브라우저 확인 대기.
 - 2026-05-22 — 과제 2 (반응형+모바일 모드) 구현 완료: device.php 디바이스 감지, header/footer 셸 분기, 모바일 헤더+드로어+하단탭바, Vary 헤더. 전 페이지 렌더 검증 통과. → feature/seo-mobile 브랜치 push 완료.
-- 2026-05-22 — 과제 4 (테마 시스템) 구현 완료: 테마 로더 + 5개 테마(classic/modern/magazine/bold/compact) + 어드민 테마 전환 UI. 20개 테마파일 검증, 5종 렌더 통과. → 브랜치 push 예정.
+- 2026-05-22 — 과제 4 (테마 시스템) 구현 완료: 테마 로더 + 5개 테마(classic/modern/magazine/bold/compact) + 어드민 테마 전환 UI. 20개 테마파일 검증, 5종 렌더 통과. → feature/theme-system 브랜치 push 완료.
+- 2026-05-22 — 과제 4 후속 수정 4건: ①compact 히어로 깨짐(Swiper×grid 폭주) → 정적배너 교체 ②공유 푸터에 관리자 링크(전 테마) ③미리보기를 ?preview_theme= 방식으로 ④어드민 색상 편집(color_overrides.json, primary/accent 직접 지정). 검증 통과 → feature/theme-system push.
+
+## Git 브랜치 현황
+- `feature/seo-mobile` — 과제 1(SEO/AEO) + 과제 2(반응형/모바일). push 완료.
+- `feature/theme-system` — 과제 4(테마 시스템) + 후속 수정. push 완료. (seo-mobile에서 분기)
+- master 병합은 사용자가 PR 검토 후 진행 예정.
