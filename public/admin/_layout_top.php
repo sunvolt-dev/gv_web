@@ -43,6 +43,7 @@ $admin_title = $admin_title ?? '관리자';
       ['url' => '/admin/categories.php','icon' => '🗂️', 'label' => '카테고리 관리',  'key' => 'categories'],
       ['url' => '/admin/posts.php',     'icon' => '📝', 'label' => '블로그 관리',    'key' => 'posts'],
       ['url' => '/admin/cases.php',     'icon' => '🏢', 'label' => '납품사례 관리',  'key' => 'cases'],
+      ['url' => '/admin/theme.php',     'icon' => '🎨', 'label' => '테마 설정',      'key' => 'theme'],
     ];
     foreach ($menu as $m):
       $active = $m['key'] === $admin_page;

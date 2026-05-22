@@ -51,11 +51,16 @@ Webpage/
 │   ├── cases/              # 납품사례 목록·상세
 │   ├── admin/              # 관리자 (상품·카테고리·블로그·납품사례·배너 CRUD)
 │   └── assets/             # css·js·images
+├── themes/                # 레이아웃 테마 (과제 4)
+│   ├── classic/ modern/ magazine/ bold/ compact/
+│   └── 각 테마: theme.php(색상)·header.php·home.php·product_card.php
 ├── sql/
 │   ├── schema.sql          # 전체 스키마 + 시드 (처음 셋업용)
 │   └── migrations/         # 증분 마이그레이션 (기존 데이터 보존)
 ├── README.md / REQUIREMENTS.md
 ```
+
+테마 전환: `includes/config.php`의 `'theme'` 값, 또는 어드민 → 테마 설정.
 
 ## 4. DB 스키마 (DB명: `sunvolt-webpage`)
 
@@ -121,6 +126,7 @@ Webpage/
 
 > 최신이 위. 작업 완료 시마다 한 줄 추가.
 
+- **2026-05-22** — 과제 4: 테마 시스템 — 5개 레이아웃(classic/modern/magazine/bold/compact) + 어드민 전환 UI
 - **2026-05-22** — 과제 2: 반응형 + 모바일 전용 모드 (디바이스 감지, 모바일 셸·하단 탭바)
 - **2026-05-22** — 과제 1: SEO/AEO (robots·sitemap·구조화데이터·OG·FAQ 페이지)
 - **2026-04-29** — docs 체계 수립 (PROJECT.md / ACTION_PLAN.md). 5대 과제 착수: SEO/AEO, 모바일 모드, 앱화, 5레이아웃, 멀티사이트 복제

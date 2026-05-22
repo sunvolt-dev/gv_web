@@ -91,15 +91,18 @@
 - 테마 5종 컨셉(안): `classic`(현재) · `modern`(미니멀) · `magazine`(매거진형) · `bold`(강렬·대형타이포) · `compact`(정보밀집형)
 
 ### 단계
-- [ ] 4-1. 테마 로더 설계 — `includes/theme.php`, config에 `theme` 키 추가
-- [ ] 4-2. 현재 디자인을 `themes/classic/`으로 분리 (헤더·푸터·메인·상품카드·theme.css)
-- [ ] 4-3. 페이지들이 테마 인지하도록 리팩터 (header/footer include 경로를 테마 기준으로)
-- [ ] 4-4. `themes/modern/` 구현
-- [ ] 4-5. `themes/magazine/` 구현
-- [ ] 4-6. `themes/bold/` 구현
-- [ ] 4-7. `themes/compact/` 구현
-- [ ] 4-8. (선택) 어드민에서 테마 전환 UI
-- **테스트**: config에서 테마 5종 각각 바꿔가며 전 페이지 정상 렌더 확인
+- [x] 4-1. 테마 로더 `includes/theme.php` + config에 `theme` 키 + functions.php 연결
+- [x] 4-2. 현재 디자인을 `themes/classic/`으로 분리 (header·home·product_card·theme)
+- [x] 4-3. header.php/index.php/_product_card.php가 테마 위임하도록 리팩터 (head·모바일셸·푸터는 공유)
+- [x] 4-4. `themes/modern/` — 미니멀(니어블랙+블루)
+- [x] 4-5. `themes/magazine/` — 에디토리얼(딥그린+테라코타)
+- [x] 4-6. `themes/bold/` — 강렬(퍼플+옐로우)
+- [x] 4-7. `themes/compact/` — 정보밀집(차콜+틸)
+- [x] 4-8. 어드민 테마 전환 UI (`admin/theme.php`) — 색상 미리보기 + 원클릭 적용
+- **테스트**: ✅ 20개 테마파일 `php -l` 통과 / 5개 테마 각각 index.php 렌더 — Fatal 없음
+  - ⏳ 사용자 브라우저 확인 대기 (어드민 테마설정에서 5종 전환)
+- **방식 메모**: `themes/{name}/` 폴더 = theme.php(색상)·header.php·home.php·product_card.php.
+  데이터·기능·모바일셸·푸터는 전 테마 공유. Tailwind 색상은 테마별 자동 주입.
 - ✅ **완료 시 → git push**
 
 ---
@@ -135,4 +138,5 @@
 
 - 2026-04-29 — ACTION_PLAN 수립, 과제 1 착수
 - 2026-04-29 — 과제 1 (SEO/AEO) 구현 완료: robots·sitemap·OG·JSON-LD(Organization/WebSite/Product/BlogPosting/Article/Breadcrumb/FAQPage)·FAQ페이지. 코드 검증 통과, 사용자 브라우저 확인 대기.
-- 2026-05-22 — 과제 2 (반응형+모바일 모드) 구현 완료: device.php 디바이스 감지, header/footer 셸 분기, 모바일 헤더+드로어+하단탭바, Vary 헤더. 전 페이지 렌더 검증 통과. → 브랜치 생성 + push 예정.
+- 2026-05-22 — 과제 2 (반응형+모바일 모드) 구현 완료: device.php 디바이스 감지, header/footer 셸 분기, 모바일 헤더+드로어+하단탭바, Vary 헤더. 전 페이지 렌더 검증 통과. → feature/seo-mobile 브랜치 push 완료.
+- 2026-05-22 — 과제 4 (테마 시스템) 구현 완료: 테마 로더 + 5개 테마(classic/modern/magazine/bold/compact) + 어드민 테마 전환 UI. 20개 테마파일 검증, 5종 렌더 통과. → 브랜치 push 예정.
