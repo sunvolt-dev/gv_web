@@ -104,7 +104,7 @@ $IS_MOBILE = function_exists('is_mobile') ? is_mobile() : false;
         <li><a href="/cases/list.php" class="hover:text-accent">납품사례</a></li>
         <li><a href="/blog/list.php" class="hover:text-accent">블로그</a></li>
         <li><a href="#" class="hover:text-accent">이용약관</a></li>
-        <li><a href="#" class="hover:text-accent">개인정보처리방침</a></li>
+        <li><a href="/admin/" class="hover:text-accent">🔒 관리자</a></li>
       </ul>
     </div>
   </div>

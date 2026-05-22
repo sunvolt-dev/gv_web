@@ -2,9 +2,9 @@
 
 <!-- HERO + 사이드 카테고리 (밀집형) -->
 <section class="max-w-[1280px] mx-auto px-4 py-4">
-  <div class="grid md:grid-cols-[200px_1fr] gap-3">
+  <div class="grid md:grid-cols-[200px_minmax(0,1fr)] gap-3">
     <!-- 사이드 카테고리 -->
-    <aside class="hidden md:block border border-gray-200 bg-white">
+    <aside class="hidden md:block border border-gray-200 bg-white self-start">
       <div class="bg-primary text-white text-xs font-bold px-3 py-2">전체 카테고리</div>
       <ul class="text-sm">
         <?php foreach ($top_categories as $c): ?>
@@ -17,31 +17,27 @@
         <li><a href="/blog/list.php" class="block px-3 py-2 text-gray-600 hover:bg-gray-50">블로그</a></li>
       </ul>
     </aside>
-    <!-- 배너 슬라이더 -->
-    <?php if (!empty($banners)): ?>
-    <div class="swiper hero-swiper border border-gray-200">
-      <div class="swiper-wrapper">
-        <?php foreach ($banners as $b): ?>
-        <div class="swiper-slide relative">
-          <img src="<?= h($b['image_url']) ?>" alt="<?= h($b['title']) ?>" class="w-full aspect-[21/9] object-cover">
-          <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent flex items-center">
-            <div class="px-6 md:px-10 text-white max-w-md">
-              <h1 class="text-xl md:text-3xl font-extrabold leading-tight"><?= h($b['title']) ?></h1>
-              <?php if ($b['cta_text']): ?>
-              <a href="<?= h($b['cta_url'] ?: '#') ?>" class="inline-block mt-3 px-4 py-1.5 bg-accent text-white text-xs font-bold rounded"><?= h($b['cta_text']) ?> →</a>
-              <?php endif; ?>
-            </div>
-          </div>
+    <!-- 메인 배너 (정적 — 첫 배너) -->
+    <?php $hb = $banners[0] ?? null; if ($hb): ?>
+    <a href="<?= h($hb['cta_url'] ?: '#') ?>" class="relative block min-w-0 border border-gray-200 overflow-hidden group">
+      <img src="<?= h($hb['image_url']) ?>" alt="<?= h($hb['title']) ?>"
+           class="w-full aspect-[21/9] object-cover group-hover:scale-105 transition duration-500">
+      <div class="absolute inset-0 bg-gradient-to-r from-black/65 to-transparent flex items-center">
+        <div class="px-6 md:px-10 text-white max-w-md">
+          <?php if ($hb['accent_label']): ?>
+          <div class="text-[11px] font-bold text-accent mb-1.5"><?= h($hb['accent_label']) ?></div>
+          <?php endif; ?>
+          <h1 class="text-xl md:text-3xl font-extrabold leading-tight"><?= h($hb['title']) ?></h1>
+          <?php if ($hb['cta_text']): ?>
+          <span class="inline-block mt-3 px-4 py-1.5 bg-accent text-white text-xs font-bold rounded"><?= h($hb['cta_text']) ?> →</span>
+          <?php endif; ?>
         </div>
-        <?php endforeach; ?>
       </div>
-      <div class="swiper-pagination"></div>
+    </a>
+    <?php else: ?>
+    <div class="min-w-0 border border-gray-200 bg-gray-50 flex items-center justify-center aspect-[21/9] text-gray-400 text-sm">
+      관리자에서 배너를 등록하세요
     </div>
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        new Swiper('.hero-swiper', { loop: true, autoplay: { delay: 4500 }, pagination: { el: '.hero-swiper .swiper-pagination', clickable: true } });
-      });
-    </script>
     <?php endif; ?>
   </div>
 </section>

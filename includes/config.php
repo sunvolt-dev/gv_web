@@ -37,5 +37,5 @@ return [
 
     // 레이아웃 테마 — themes/ 폴더의 테마명 (classic/modern/magazine/bold/compact)
     // 이 한 줄만 바꾸면 사이트 전체 레이아웃·디자인이 교체됨.
-    'theme' => 'classic',
+    'theme' => 'magazine',
 ];
