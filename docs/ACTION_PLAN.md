@@ -1,0 +1,138 @@
+# ACTION PLAN — 5대 과제
+
+> 각 과제를 **단계로 쪼개고, 하나씩 수행 → 테스트 → 동작 확인 후 다음**으로 진행한다.
+> 완료 시 `[ ]` → `[x]`. 막히면 `[!]` 표시 + 사유 기록.
+> 상위 맥락은 [PROJECT.md](PROJECT.md) 참조.
+
+상태 범례: `[ ]` 대기 · `[~]` 진행중 · `[x]` 완료·검증됨 · `[!]` 막힘
+
+---
+
+## 과제 1. SEO / AEO 적용
+
+### 검토 결과
+- **SEO**(검색엔진최적화) = Google·Naver 봇 대응 / **AEO**(답변엔진최적화) = ChatGPT·Perplexity·AI 개요 대응
+- **자유롭게 설정 가능한가? → 100% 가능.** 우리 소유 PHP 코드라 메타·헤더·구조·robots·sitemap 전부 제어. 호스팅 종속 없음.
+- 현재 상태: `<title>`·`<meta description>`은 페이지별 있음 / 나머지(robots, sitemap, OG, 구조화 데이터, canonical, FAQ)는 **전부 없음**
+- AEO 핵심은 **구조화 데이터(JSON-LD Schema.org)** — Product·Article·FAQPage·BreadcrumbList. AI가 페이지 의미를 이해하게 함.
+
+### 단계
+- [x] 1-1. `public/robots.php` 생성 (`.htaccess`로 `/robots.txt` 매핑, 도메인 자동 인식)
+- [x] 1-2. `public/sitemap.php` 동적 XML — 홈·카테고리·전상품·블로그·납품사례·FAQ (검증: 43개 URL)
+- [x] 1-3. `includes/header.php` 메타 확장 — Open Graph, Twitter Card, canonical, robots 메타
+- [x] 1-4. 전역 JSON-LD — Organization, WebSite (검색박스 포함)
+- [x] 1-5. 상품 상세 JSON-LD — Product (가격·재고·이미지)
+- [x] 1-6. 블로그 상세 JSON-LD — BlogPosting
+- [x] 1-7. BreadcrumbList JSON-LD — 상품·블로그·납품사례·FAQ 상세
+- [x] 1-8. `public/faq.php` FAQ 페이지 신규 + FAQPage JSON-LD (질문 10개)
+- [x] 1-9. GNB·푸터에 FAQ 링크 추가, og:image 기본값 설정
+- **테스트**: ✅ 전 파일 `php -l` 통과 / robots·sitemap CLI 출력 정상 / JSON-LD 헬퍼 동작 확인
+  - ⏳ 사용자 브라우저 확인 대기 (페이지 소스의 메타·JSON-LD, Google Rich Results Test)
+
+---
+
+## 과제 2. 반응형 + 모바일 전용 모드
+
+### 검토 결과
+- 요구: **PC = 반응형**, **모바일 = 아예 모바일 모드** (네이버 PC/m.naver 처럼 명확히 분리된 UX)
+- 현재: Tailwind 반응형(모바일우선) — 모바일에서 "작동"은 하나 PC의 축소판 수준
+- 접근법 3가지:
+  - A) 순수 반응형 강화 — 한 코드, 한계: "모바일 전용 느낌" 약함
+  - **B) 디바이스 감지 → 모바일 전용 템플릿 (채택)** — User-Agent 감지, URL 동일, 데이터 레이어 공유, 뷰만 모바일 전용 재구성
+  - C) `m.` 서브도메인 분리 — 관리 부담 큼
+- **채택: B.** 같은 URL 유지(SEO 안전, dynamic serving — Google 공식 허용), `Vary: User-Agent` 헤더 추가. 모바일은 하단탭바·풀스크린 메뉴 등 앱같은 UX.
+
+### 단계
+- [x] 2-1. `includes/device.php` — User-Agent 감지 + `?view=mobile/pc` 강제 전환(쿠키 30일)
+- [x] 2-2. 뷰 분기 구조 — `header.php`/`footer.php`가 `is_mobile()`로 셸 분기 (head·SEO는 공유)
+- [x] 2-3. 모바일 헤더(다크 바+검색+가로 카테고리칩) + 전체화면 드로어 메뉴 + **하단 고정 탭바**(홈·카테고리·장바구니·마이페이지)
+- [x] 2-4. 모바일 메인 — 반응형 콘텐츠(grid-cols-2 등) + 모바일 셸로 처리
+- [x] 2-5. 모바일 상품 목록·상세 — 반응형 + 모바일 셸 (렌더 검증 통과)
+- [x] 2-6. 모바일 장바구니·결제·마이페이지·블로그·납품사례 — 동일 방식 (렌더 검증 통과)
+- [x] 2-7. `Vary: User-Agent` 헤더 + 푸터에 "PC 버전 ↔ 모바일 버전" 토글 링크
+- **테스트**: ✅ 모바일/PC UA 양쪽 전 페이지 CLI 렌더 — Fatal/Warning 없음. PC모드에 모바일요소 0개 확인.
+  - ⏳ 사용자 브라우저 확인 대기 (실제 모바일/DevTools 기기모드)
+- **방식 메모**: 페이지별 완전 분리 템플릿 대신 **"모바일 셸(헤더·드로어·하단탭바·푸터) + 반응형 콘텐츠"** 채택. 15개 페이지 코드 중복 없이 네이버형 모바일 UX 구현. 특정 페이지에 모바일 전용 레이아웃이 더 필요하면 후속 추가 가능.
+- ✅ **완료 시 → 새 브랜치 생성 + git push**
+
+---
+
+## 과제 3. 앱(App) 배포 검토
+
+### 검토 결과 — "과제 2와 다른 케이스인가?" → **그렇다, 완전히 다름**
+- 과제 2 = 모바일 **브라우저**에서 보는 웹 / 과제 3 = **설치하는 애플리케이션**
+- "이 페이지를 앱으로" 만드는 3가지 길:
+  - **A) PWA (Progressive Web App)** — `manifest.json` + 서비스워커 추가. 홈화면 설치·오프라인 일부·푸시 가능. 우리 PHP 사이트에 파일 몇 개 추가로 됨. **1순위**
+  - **B) WebView 래퍼** — 네이티브 껍데기로 웹을 감쌈 (Capacitor 등). 앱스토어·플레이스토어 등록 가능. 웹 코드 재사용. PWA 후 필요 시.
+  - C) 네이티브 재작성 (React Native/Flutter) — API 백엔드 필요, 풀 리라이트. 비권장.
+- **전제**: 과제 2(모바일 모드)가 잘 돼있어야 PWA 품질이 좋음. 그래서 과제 2 다음에 진행.
+
+### 단계
+- [ ] 3-1. `public/manifest.json` — 앱 이름·아이콘·테마색·시작URL·display:standalone
+- [ ] 3-2. 앱 아이콘 세트 (192·512px 등) `assets/icons/`
+- [ ] 3-3. `public/service-worker.js` — 기본 캐싱(오프라인 폴백 페이지)
+- [ ] 3-4. `header.php`에 manifest 링크·apple-touch-icon·테마컬러 메타
+- [ ] 3-5. 서비스워커 등록 스크립트
+- [ ] 3-6. "홈 화면에 추가" 안내 배너 (모바일, 1회성)
+- [ ] 3-7. WebView 래퍼(B) 경로 문서화 — 실제 스토어 등록은 별도 결정
+- **테스트**: Chrome DevTools > Application 탭 (manifest·SW 인식), Lighthouse PWA 점수, 모바일 "홈 화면에 추가" 동작
+- ✅ **완료 시 → 새 브랜치 생성 + git push**
+
+---
+
+## 과제 4. 5가지 레이아웃 베리에이션 (테마 시스템)
+
+### 검토 결과
+- 요구: 자사 여러 사이트용 레이아웃 5종. 데이터·세팅 방식은 비슷하되 **레이아웃이 달라 "다른 사이트다"** 느낌.
+- 접근법:
+  - CSS만 교체 → "색만 다른" 수준, 요구 미달
+  - **테마 시스템 (채택)** — `themes/` 폴더에 테마별 레이아웃 템플릿+CSS. 데이터 레이어(`functions.php`,`db.php`)는 공유.
+- **채택 구조**: `config.php`의 `'theme'` 값으로 전환. 각 테마는 헤더/푸터/메인레이아웃/상품카드/CSS 보유.
+- 테마 5종 컨셉(안): `classic`(현재) · `modern`(미니멀) · `magazine`(매거진형) · `bold`(강렬·대형타이포) · `compact`(정보밀집형)
+
+### 단계
+- [ ] 4-1. 테마 로더 설계 — `includes/theme.php`, config에 `theme` 키 추가
+- [ ] 4-2. 현재 디자인을 `themes/classic/`으로 분리 (헤더·푸터·메인·상품카드·theme.css)
+- [ ] 4-3. 페이지들이 테마 인지하도록 리팩터 (header/footer include 경로를 테마 기준으로)
+- [ ] 4-4. `themes/modern/` 구현
+- [ ] 4-5. `themes/magazine/` 구현
+- [ ] 4-6. `themes/bold/` 구현
+- [ ] 4-7. `themes/compact/` 구현
+- [ ] 4-8. (선택) 어드민에서 테마 전환 UI
+- **테스트**: config에서 테마 5종 각각 바꿔가며 전 페이지 정상 렌더 확인
+- ✅ **완료 시 → git push**
+
+---
+
+## 과제 5. 프로젝트 복제 / 멀티사이트 자동화
+
+### 검토 결과
+- 요구: 이 프로젝트를 복제해 다른 페이지·도메인에 연결, 자유롭게 사용. 서버 분리·이미지 자동화 고려.
+- 검토 포인트:
+  - 인스턴스별로 달라지는 것: 사이트명·DB·테마·도메인·이미지 → 전부 `config.php`로 집약
+  - 새 인스턴스 셋업 자동화 스크립트 필요 (DB 생성·시드·설정)
+  - 이미지: 인스턴스별 `assets/images/` 보유 OR 공유. 자동화 시 기본 이미지 세트 복사.
+- **방식(안)**: 설치 스크립트(`setup.php` 또는 CLI) + config 템플릿 + 이미지 시드 복사 자동화. 서버 분리는 배포 스크립트로.
+
+### 단계
+- [ ] 5-1. 인스턴스 가변 요소를 `config.php`로 완전 집약 (잔여 하드코딩 제거)
+- [ ] 5-2. `config.sample.php` 템플릿 + 신규 인스턴스 생성 가이드
+- [ ] 5-3. 설치 스크립트 — DB 생성·schema import·관리자 계정 생성 자동화
+- [ ] 5-4. 이미지 시드 자동 복사 + 기본 이미지 세트 정리
+- [ ] 5-5. 멀티 인스턴스 배포 절차 문서화 (서버별 vhost·DB 분리)
+- [ ] 5-6. 복제 테스트 — 2번째 인스턴스 띄워 동작 검증
+- **테스트**: 사본 인스턴스를 다른 DB·테마로 띄워 독립 동작 확인
+
+---
+
+## 최종 보고
+- [ ] 과제 1~5 진행 결과 보고서 작성 — 완료/미완/막힌 지점 정리 → `docs/REPORT.md`
+
+---
+
+## 진행 로그
+> 작업할 때마다 한 줄씩 추가 (날짜 · 무엇을 · 결과).
+
+- 2026-04-29 — ACTION_PLAN 수립, 과제 1 착수
+- 2026-04-29 — 과제 1 (SEO/AEO) 구현 완료: robots·sitemap·OG·JSON-LD(Organization/WebSite/Product/BlogPosting/Article/Breadcrumb/FAQPage)·FAQ페이지. 코드 검증 통과, 사용자 브라우저 확인 대기.
+- 2026-05-22 — 과제 2 (반응형+모바일 모드) 구현 완료: device.php 디바이스 감지, header/footer 셸 분기, 모바일 헤더+드로어+하단탭바, Vary 헤더. 전 페이지 렌더 검증 통과. → 브랜치 생성 + push 예정.

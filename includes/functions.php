@@ -258,3 +258,86 @@ function pagination_links(int $current, int $total, int $per_page): array
     $end   = min($pages, $current + 2);
     return ['pages' => $pages, 'start' => $start, 'end' => $end];
 }
+
+/* ────────────────────────────────────────────────────────
+   SEO / AEO 헬퍼
+─────────────────────────────────────────────────────────*/
+
+/** http(s)://호스트 — 스킴+도메인 (경로 없음) */
+function site_origin(): string
+{
+    $https  = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+              || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+    $scheme = $https ? 'https' : 'http';
+    $host   = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    return $scheme . '://' . $host;
+}
+
+/** 절대 URL — 상대경로를 풀 URL로 */
+function abs_url(string $path): string
+{
+    if ($path === '') return site_origin();
+    if (preg_match('#^https?://#i', $path)) return $path;
+    return site_origin() . '/' . ltrim($path, '/');
+}
+
+/** 현재 페이지 canonical URL (쿼리스트링 포함) */
+function canonical_url(): string
+{
+    return site_origin() . ($_SERVER['REQUEST_URI'] ?? '/');
+}
+
+/** JSON-LD 구조화 데이터 1개를 <script> 태그로 */
+function json_ld(array $data): string
+{
+    return '<script type="application/ld+json">'
+         . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
+         . '</script>';
+}
+
+/** 빵부스러기 → BreadcrumbList JSON-LD 배열 */
+function breadcrumb_ld(array $items): array
+{
+    $list = [];
+    $pos  = 1;
+    foreach ($items as $name => $path) {
+        $entry = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $name];
+        if ($path) $entry['item'] = abs_url($path);
+        $list[] = $entry;
+    }
+    return ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $list];
+}
+
+/** 회사 Organization JSON-LD */
+function organization_ld(): array
+{
+    static $cfg = null;
+    if ($cfg === null) $cfg = require __DIR__ . '/config.php';
+    $s = $cfg['site'];
+    return [
+        '@context' => 'https://schema.org',
+        '@type'    => 'Organization',
+        'name'     => $s['name'],
+        'url'      => site_origin(),
+        'telephone'=> $s['phone'],
+        'address'  => ['@type' => 'PostalAddress', 'streetAddress' => $s['address'], 'addressCountry' => 'KR'],
+    ];
+}
+
+/** 사이트 WebSite JSON-LD (검색박스 포함) */
+function website_ld(): array
+{
+    static $cfg = null;
+    if ($cfg === null) $cfg = require __DIR__ . '/config.php';
+    return [
+        '@context' => 'https://schema.org',
+        '@type'    => 'WebSite',
+        'name'     => $cfg['site']['name'],
+        'url'      => site_origin(),
+        'potentialAction' => [
+            '@type'       => 'SearchAction',
+            'target'      => ['@type' => 'EntryPoint', 'urlTemplate' => site_origin() . '/shop/list.php?q={search_term_string}'],
+            'query-input' => 'required name=search_term_string',
+        ],
+    ];
+}

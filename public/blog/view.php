@@ -23,7 +23,26 @@ $prev = db_one('SELECT id, title FROM posts WHERE published = 1 AND id < ? ORDER
 $next = db_one('SELECT id, title FROM posts WHERE published = 1 AND id > ? ORDER BY id ASC LIMIT 1', [$id]);
 
 $page_title = $post['title'];
-$page_desc  = (string)$post['summary'];
+$page_desc  = (string)$post['summary'] ?: mb_substr(strip_tags((string)$post['content']), 0, 150);
+$og_type    = 'article';
+$og_image   = $post['thumbnail'] ?: 'https://placehold.co/1200x630/0A2540/FFC107?text=Sunvolt+Blog';
+
+/* ── 구조화 데이터: BlogPosting + BreadcrumbList ── */
+$json_ld = [
+    [
+        '@context'      => 'https://schema.org',
+        '@type'         => 'BlogPosting',
+        'headline'      => $post['title'],
+        'description'   => $page_desc,
+        'image'         => abs_url($og_image),
+        'datePublished' => date('c', strtotime($post['created_at'])),
+        'dateModified'  => date('c', strtotime($post['updated_at'] ?: $post['created_at'])),
+        'author'        => ['@type' => 'Organization', 'name' => $site_name_for_ld = '썬볼트 배터리몰'],
+        'publisher'     => organization_ld(),
+        'mainEntityOfPage' => canonical_url(),
+    ],
+    breadcrumb_ld(['HOME' => '/', '블로그' => '/blog/list.php', $post['title'] => null]),
+];
 require __DIR__ . '/../../includes/header.php';
 ?>
 

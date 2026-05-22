@@ -18,7 +18,26 @@ if (!$case) {
 $images = db_all('SELECT * FROM case_images WHERE case_id = ? ORDER BY sort_order, id', [$id]);
 
 $page_title = $case['title'];
-$page_desc  = (string)$case['summary'];
+$page_desc  = (string)$case['summary'] ?: mb_substr(strip_tags((string)$case['content']), 0, 150);
+$og_type    = 'article';
+$og_image   = $images[0]['image_url'] ?? 'https://placehold.co/1200x630/0A2540/FFC107?text=Sunvolt+Case';
+
+/* ── 구조화 데이터: Article + BreadcrumbList ── */
+$json_ld = [
+    [
+        '@context'      => 'https://schema.org',
+        '@type'         => 'Article',
+        'headline'      => $case['title'],
+        'description'   => $page_desc,
+        'image'         => abs_url($og_image),
+        'datePublished' => date('c', strtotime($case['created_at'])),
+        'dateModified'  => date('c', strtotime($case['updated_at'] ?: $case['created_at'])),
+        'author'        => organization_ld(),
+        'publisher'     => organization_ld(),
+        'mainEntityOfPage' => canonical_url(),
+    ],
+    breadcrumb_ld(['HOME' => '/', '납품사례' => '/cases/list.php', $case['title'] => null]),
+];
 require __DIR__ . '/../../includes/header.php';
 ?>
 

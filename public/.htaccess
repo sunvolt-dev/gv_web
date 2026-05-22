@@ -1,0 +1,16 @@
+# ── 웹 루트 .htaccess ──
+RewriteEngine On
+
+# robots.txt / sitemap.xml → PHP 동적 생성 (도메인 자동 인식)
+RewriteRule ^robots\.txt$   robots.php   [L]
+RewriteRule ^sitemap\.xml$  sitemap.php  [L]
+
+# 보안 헤더
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set X-Frame-Options "SAMEORIGIN"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# 디렉터리 목록 노출 차단
+Options -Indexes

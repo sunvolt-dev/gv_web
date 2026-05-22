@@ -27,7 +27,33 @@ $rate       = $has_sale ? discount_rate((int)$p['it_price'], (int)$p['it_sell_pr
 $opt_groups = get_options_grouped((int)$p['it_id']);
 
 $page_title = $p['it_name'];
-$page_desc  = (string)$p['it_summary'];
+$page_desc  = (string)$p['it_summary'] ?: mb_substr(strip_tags((string)$p['it_desc']), 0, 150);
+$og_type    = 'product';
+$og_image   = $images[0];
+
+/* ── 구조화 데이터: Product + BreadcrumbList ── */
+$bc = ['HOME' => '/'];
+foreach ($breadcrumb as $b) $bc[$b['ca_name']] = '/shop/list.php?ca_id=' . $b['ca_id'];
+$bc[$p['it_name']] = null;
+
+$product_ld = [
+    '@context'    => 'https://schema.org',
+    '@type'       => 'Product',
+    'name'        => $p['it_name'],
+    'description' => $page_desc,
+    'image'       => array_map('abs_url', $images),
+    'sku'         => 'SV-' . $p['it_id'],
+    'brand'       => ['@type' => 'Brand', 'name' => '썬볼트'],
+    'offers'      => [
+        '@type'         => 'Offer',
+        'url'           => canonical_url(),
+        'priceCurrency' => 'KRW',
+        'price'         => (string)$base_price,
+        'availability'  => $p['it_stock'] > 0
+            ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    ],
+];
+$json_ld = [$product_ld, breadcrumb_ld($bc)];
 
 require __DIR__ . '/../../includes/header.php';
 ?>

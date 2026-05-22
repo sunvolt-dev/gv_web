@@ -7,6 +7,10 @@
 /* 부드러운 스크롤 */
 html { scroll-behavior: smooth; }
 
+/* 스크롤바 숨김 (모바일 카테고리 칩 등) */
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
 /* 상품 설명 영역 (HTML 콘텐츠) */
 .prose-product { line-height: 1.7; color: #1F2937; }
 .prose-product h3 { font-size: 1.25rem; font-weight: 700; color: #0A2540; margin: 1.5rem 0 0.75rem; }
