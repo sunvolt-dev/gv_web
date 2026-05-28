@@ -4,14 +4,14 @@
 --
 -- 사용법:
 --   1) HeidiSQL(Laragon 내장) 또는 MySQL CLI에서 이 파일 import
---   2) DB 'Sunvolt-webpage' 자동 생성됨
+--   2) DB 'sunvolt-webpage' 자동 생성됨
 --   3) 어드민 계정: admin / admin1234
 -- ====================================================================
 
-CREATE DATABASE IF NOT EXISTS `Sunvolt-webpage`
+CREATE DATABASE IF NOT EXISTS `sunvolt-webpage`
   DEFAULT CHARACTER SET utf8mb4
   DEFAULT COLLATE utf8mb4_unicode_ci;
-USE `Sunvolt-webpage`;
+USE `sunvolt-webpage`;
 
 -- 기존 테이블 정리 (재실행 안전)
 SET FOREIGN_KEY_CHECKS = 0;
@@ -484,7 +484,7 @@ INSERT INTO `banners` (`title`, `subtitle`, `image_url`, `cta_text`, `cta_url`, 
  'B2B 전용', 'left', 3, 1);
 
 -- 끝
-SELECT '✓ Sunvolt-webpage DB 시드 완료' AS message,
+SELECT '✓ sunvolt-webpage DB 시드 완료' AS message,
        (SELECT COUNT(*) FROM categories) AS categories,
        (SELECT COUNT(*) FROM products)   AS products,
        (SELECT COUNT(*) FROM product_options) AS options,

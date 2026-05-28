@@ -23,12 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $new = preg_replace('/[^a-z]/', '', (string)($_POST['theme'] ?? ''));
         if (in_array($new, $theme_keys, true)) {
             $src = file_get_contents($config_path);
-            $out = preg_replace("/'theme'\s*=>\s*'[a-z]*'/", "'theme' => '$new'", $src, 1, $cnt);
+            // config.php 의 `$theme_default = 'X';` 한 줄만 정규식으로 교체
+            $out = preg_replace('/\$theme_default\s*=\s*\'[a-z]*\';/', "\$theme_default = '$new';", $src, 1, $cnt);
             if ($cnt > 0 && $out !== null) {
                 file_put_contents($config_path, $out);
                 $_SESSION['flash'] = "테마가 '$new' (으)로 변경되었습니다.";
             } else {
-                $_SESSION['flash_err'] = 'config.php에서 theme 항목을 찾지 못했습니다.';
+                $_SESSION['flash_err'] = 'config.php 에서 \$theme_default 줄을 찾지 못했습니다.';
             }
         } else {
             $_SESSION['flash_err'] = '알 수 없는 테마입니다.';

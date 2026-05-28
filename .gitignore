@@ -1,0 +1,23 @@
+# 인스턴스별 비밀 설정
+.env
+.env.local
+.env.*.local
+
+# Docker 임시
+docker-compose.override.yml
+
+# 에디터
+.idea/
+.vscode/
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# 업로드 이미지(인스턴스별로 다름 — Git에 안 올림)
+public/assets/images/uploads/*
+public/assets/images/cases/*
+public/assets/images/banners/*
+public/assets/images/products/*
+!public/assets/images/**/.gitkeep

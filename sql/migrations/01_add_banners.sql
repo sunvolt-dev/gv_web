@@ -5,7 +5,7 @@
 --   기존 데이터는 유지됨. banners 테이블만 새로 생성.
 -- ====================================================================
 
-USE `Sunvolt-webpage`;
+USE `sunvolt-webpage`;
 
 DROP TABLE IF EXISTS `banners`;
 

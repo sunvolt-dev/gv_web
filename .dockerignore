@@ -1,0 +1,12 @@
+# Docker 빌드 컨텍스트 제외 (이미지 크기·빌드 시간 절약)
+.git
+.gitignore
+.idea
+.vscode
+.claude
+node_modules
+docs
+*.md
+*.log
+.env
+.env.local

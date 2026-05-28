@@ -1,0 +1,62 @@
+# =====================================================================
+# Webpage — 단일 인스턴스 (개발/기본)
+# 실행: docker compose up -d --build
+# 접속: http://localhost:${WEB_PORT}  (기본 8080)
+# 멀티사이트: .env 다른 값으로 디렉터리 통째 복사 OR -p 프로젝트명 지정
+# =====================================================================
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${INSTANCE_NAME:-sunvolt-web}
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    volumes:
+      # 코드 라이브 마운트 (개발) — 운영 이미지는 별도 Dockerfile.prod로
+      - .:/var/www/html
+      # 업로드 이미지는 호스트에 영구 저장
+      - ./public/assets/images:/var/www/html/public/assets/images
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-sunvolt-webpage}
+      DB_USER: ${DB_USER:-root}
+      DB_PASS: ${DB_PASS:-rootpass}
+      SITE_NAME: ${SITE_NAME:-}
+      SITE_THEME: ${SITE_THEME:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: ${INSTANCE_NAME:-sunvolt}-db
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --lower_case_table_names=1
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-rootpass}
+      MYSQL_DATABASE: ${DB_NAME:-sunvolt-webpage}
+    ports:
+      - "${DB_PORT:-3307}:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+      # 첫 부팅 시 자동 import — db-init.sh가 MYSQL_DATABASE 환경 기준으로
+      # CREATE DATABASE/USE 를 무시하고 schema 를 주입 (멀티사이트 안전)
+      - ./sql/schema.sql:/db-init/schema.sql:ro
+      - ./docker/db-init.sh:/docker-entrypoint-initdb.d/01-init.sh:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${DB_PASS:-rootpass}"]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  dbdata:
+    name: ${INSTANCE_NAME:-sunvolt}-dbdata

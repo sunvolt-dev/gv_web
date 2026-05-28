@@ -109,22 +109,27 @@
 
 ## 과제 5. 프로젝트 복제 / 멀티사이트 자동화
 
-### 검토 결과
-- 요구: 이 프로젝트를 복제해 다른 페이지·도메인에 연결, 자유롭게 사용. 서버 분리·이미지 자동화 고려.
-- 검토 포인트:
-  - 인스턴스별로 달라지는 것: 사이트명·DB·테마·도메인·이미지 → 전부 `config.php`로 집약
-  - 새 인스턴스 셋업 자동화 스크립트 필요 (DB 생성·시드·설정)
-  - 이미지: 인스턴스별 `assets/images/` 보유 OR 공유. 자동화 시 기본 이미지 세트 복사.
-- **방식(안)**: 설치 스크립트(`setup.php` 또는 CLI) + config 템플릿 + 이미지 시드 복사 자동화. 서버 분리는 배포 스크립트로.
+### 검토 결과 (Docker 중심으로 재구성)
+- 목표: 회사 내부 Linux 서버에서 운영. Laragon은 Windows 데스크탑 전용이라 부적합.
+- **방식 확정**: Docker 컨테이너화. PHP-Apache + MySQL을 docker-compose로 묶음.
+  - OS 무관(Win/Mac/Linux), 환경 동일성 보장, 한 줄 배포(`docker compose up -d`).
+  - 회사 서버 부팅 시 자동 시작(restart 정책), GUI 불필요.
+  - 멀티사이트 = 인스턴스별 `.env` 다르게 + 컴포즈 N개.
+- 라이선스: Docker Engine(Linux) 무료. Docker Desktop은 소규모 회사 무료.
 
 ### 단계
-- [ ] 5-1. 인스턴스 가변 요소를 `config.php`로 완전 집약 (잔여 하드코딩 제거)
-- [ ] 5-2. `config.sample.php` 템플릿 + 신규 인스턴스 생성 가이드
-- [ ] 5-3. 설치 스크립트 — DB 생성·schema import·관리자 계정 생성 자동화
-- [ ] 5-4. 이미지 시드 자동 복사 + 기본 이미지 세트 정리
-- [ ] 5-5. 멀티 인스턴스 배포 절차 문서화 (서버별 vhost·DB 분리)
-- [ ] 5-6. 복제 테스트 — 2번째 인스턴스 띄워 동작 검증
-- **테스트**: 사본 인스턴스를 다른 DB·테마로 띄워 독립 동작 확인
+- [x] 5-1. Dockerfile (PHP 8.2 + Apache + pdo_mysql/mbstring/gd + rewrite + DocumentRoot=public)
+- [x] 5-2. docker/apache.conf + docker/php.ini (업로드 25M·timezone)
+- [x] 5-3. docker-compose.yml (web + db, 헬스체크, named 볼륨, 포트 8082/3307)
+- [x] 5-4. .env.example + .env + .dockerignore + .gitignore — 인스턴스 가변요소 분리
+- [x] 5-5. config.php를 환경변수 우선으로 (`getenv('DB_HOST')` 등) — Laragon 폴백 유지. 검증 통과.
+- [x] 5-6. schema.sql 소문자 통일(`sunvolt-webpage`) + MySQL `lower_case_table_names=1` 적용
+- [x] 5-7. `docker compose up --build` → **HTTP 200**·sitemap 43URL·어드민 페이지 OK
+- [x] 5-8. 2번째 인스턴스(`koreatech`) 띄움 — 포트 8083/3308·DB `koreatech-web`·테마 `bold`·이름 `코리아텍 배터리`. **두 사이트 동시 가동 확인**.
+- [x] 5-8a. 멀티사이트 초기화 이슈 발견 → `docker/db-init.sh`로 schema.sql의 `CREATE DATABASE/USE` 자동 strip → MYSQL_DATABASE env 기준 주입 (Laragon용 원본 schema.sql 보존)
+- [ ] 5-9. (보류) 내부 회사 서버 배포 절차 문서화 — 서버 정보 받은 뒤 작업
+- **테스트**: ✅ 단일/멀티 인스턴스 모두 정상. magazine·bold 테마 동시 렌더 확인. Laragon 의존성 제거 완료.
+- ✅ **완료 시 → git push**
 
 ---
 
@@ -141,8 +146,10 @@
 - 2026-05-22 — 과제 2 (반응형+모바일 모드) 구현 완료: device.php 디바이스 감지, header/footer 셸 분기, 모바일 헤더+드로어+하단탭바, Vary 헤더. 전 페이지 렌더 검증 통과. → feature/seo-mobile 브랜치 push 완료.
 - 2026-05-22 — 과제 4 (테마 시스템) 구현 완료: 테마 로더 + 5개 테마(classic/modern/magazine/bold/compact) + 어드민 테마 전환 UI. 20개 테마파일 검증, 5종 렌더 통과. → feature/theme-system 브랜치 push 완료.
 - 2026-05-22 — 과제 4 후속 수정 4건: ①compact 히어로 깨짐(Swiper×grid 폭주) → 정적배너 교체 ②공유 푸터에 관리자 링크(전 테마) ③미리보기를 ?preview_theme= 방식으로 ④어드민 색상 편집(color_overrides.json, primary/accent 직접 지정). 검증 통과 → feature/theme-system push.
+- 2026-05-28 — 과제 5 (Docker 컨테이너화 + 멀티사이트) 구현: Dockerfile/compose, env 분리, config 환경변수 지원, db-init.sh로 멀티사이트 안전 초기화. **2개 인스턴스(sunvolt:8082, koreatech:8083) 동시 가동 검증** — 각자 다른 DB/테마/사이트명.
 
 ## Git 브랜치 현황
 - `feature/seo-mobile` — 과제 1(SEO/AEO) + 과제 2(반응형/모바일). push 완료.
 - `feature/theme-system` — 과제 4(테마 시스템) + 후속 수정. push 완료. (seo-mobile에서 분기)
+- `feature/docker-multisite` — 과제 5(Docker + 멀티사이트). push 예정. (theme-system에서 분기)
 - master 병합은 사용자가 PR 검토 후 진행 예정.
