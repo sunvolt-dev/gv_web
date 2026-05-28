@@ -17,6 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# 1.5) www-data UID/GID 를 호스트와 매핑 — 볼륨 마운트 쓰기 권한 확보
+#      (admin 페이지에서 includes/config.php, themes/color_overrides.json 등에 쓰기)
+ARG WWW_UID=1000
+ARG WWW_GID=1000
+RUN groupmod -g ${WWW_GID} www-data && usermod -u ${WWW_UID} www-data
+
 # 2) Apache 모듈 — rewrite(.htaccess) + headers(보안헤더)
 RUN a2enmod rewrite headers
 
