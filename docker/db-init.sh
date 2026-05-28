@@ -14,6 +14,8 @@ awk '
   skip { if ($0 ~ /;/) { skip = 0 }; next }
   { print }
 ' /db-init/schema.sql \
-  | mysql -uroot -p"$MYSQL_ROOT_PASSWORD" "$MYSQL_DATABASE"
+  | mysql --default-character-set=utf8mb4 \
+          -uroot -p"$MYSQL_ROOT_PASSWORD" \
+          "$MYSQL_DATABASE"
 
 echo "[db-init] done."
