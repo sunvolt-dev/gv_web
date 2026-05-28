@@ -3,6 +3,10 @@
 .env.local
 .env.*.local
 
+# DB dump (회원 정보 등 개인정보 포함)
+sql/*_data_*.sql
+sql/dumps/
+
 # Docker 임시
 docker-compose.override.yml
 

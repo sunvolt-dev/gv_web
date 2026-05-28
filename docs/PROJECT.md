@@ -76,13 +76,20 @@ Webpage/
 | `case_studies` / `case_images` | 납품사례 + 사진 |
 | `banners` | 메인 히어로 슬라이더 배너 |
 
-## 5. 개발 환경
+## 5. 개발 환경 — Docker (2026-05-28~)
 
-- **로컬**: Laragon. 프로젝트는 정션으로 `C:\laragon\www\webpage` → `D:\...\public` 연결
-- **접속**: `http://webpage.test/` (Apache vhost + hosts)
-- **PHP CLI**: `C:/laragon/bin/php/php-8.3.30-Win32-vs16-x64/php.exe`
-- **DB 접속**: 127.0.0.1 / root / (빈 비번) / `sunvolt-webpage`
-- **어드민**: `/admin/login.php` — admin / admin1234
+- **공식 환경**: Docker Desktop + docker-compose
+- **가동**: `docker compose up -d --build`
+- **접속**: `http://localhost:8082` (사이트), `/admin/` (어드민)
+- **DB 접속(외부 도구)**: 127.0.0.1:**3307** / root / rootpass / `sunvolt-webpage`
+- **어드민 계정**: admin / admin1234
+- **회원 계정**: 마이그레이션됨 (wonjeonghwan@naver.com 등)
+- **멀티사이트**: 같은 코드, `.env.site2` 등 분리. `docker compose --env-file .env.site2 -p site2 up -d`
+
+### Laragon (legacy, 2026-05-22 이전)
+- Windows 전용 데스크탑 도구라 Linux 서버 배포 불가능 → Docker로 이전
+- `config.php`는 env 없으면 Laragon 기본값(127.0.0.1, 빈 비번) 폴백 — 옛 환경 호환은 유지
+- 이전 데이터는 mysqldump → docker exec mysql import로 이관 완료
 
 ## 6. 개발 규칙 ⚠️ 반드시 준수
 
@@ -126,6 +133,7 @@ Webpage/
 
 > 최신이 위. 작업 완료 시마다 한 줄 추가.
 
+- **2026-05-28** — Laragon → Docker 데이터 마이그레이션 완료. webpage.test 폐기, localhost:8082 공식.
 - **2026-05-28** — 과제 5: Docker 컨테이너화 + 멀티사이트 (Laragon 의존 제거, 2인스턴스 검증)
 - **2026-05-22** — 과제 4 후속: compact 히어로 수정, 전 테마 관리자 링크, 테마 미리보기, 어드민 색상 편집
 - **2026-05-22** — 과제 4: 테마 시스템 — 5개 레이아웃(classic/modern/magazine/bold/compact) + 어드민 전환 UI
